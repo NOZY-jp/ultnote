@@ -1,2 +1,6 @@
 .env
-/target
+core-api/target
+pg_data/
+qdrant_data/
+ai-engine/__pycache__/
+
