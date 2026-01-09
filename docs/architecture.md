@@ -220,7 +220,7 @@
 |----------|------|------|
 | Frontend | SvelteKit + SCSS | SSRモード |
 | Web Server | Nginx | 静的ファイル配信 + リバースプロキシ |
-| API | Rust (Axum) | メインのビジネスロジック |
+| API | Rust (Axum + eyre) | メインのビジネスロジック、エラーハンドリングにeyre使用 |
 | Embedder | Python (FastAPI) | ベクトル化専用サービス |
 | Vector DB | Qdrant | 全データを格納（PostgreSQL不使用） |
 | 認証 | Cloudflare Access | Google OAuth |
@@ -243,6 +243,10 @@
 - 高速な実行性能
 - 型安全性
 - メインのビジネスロジックを担当
+- エラーハンドリング: `eyre` + `color-eyre` を使用
+  - リッチなエラーレポート
+  - スタックトレースの可視化
+  - コンテキスト追加（`.wrap_err()`）
 
 #### Python (FastAPI)
 - 埋め込みモデル（sentence-transformers）のエコシステム
@@ -874,12 +878,15 @@ ultnote/
 | ベクトル検索 | 埋め込みベクトルの類似度による検索 |
 | payload | Qdrantでベクトルに付随するJSONメタデータ |
 | 階層タグ | スラッシュ区切りの階層構造を持つタグ |
+| eyre | Rustのエラーハンドリングライブラリ。リッチなエラーレポートとコンテキスト追加が可能 |
 
 ### B. 参考リンク
 
 - [Qdrant Documentation](https://qdrant.tech/documentation/)
 - [SvelteKit Documentation](https://kit.svelte.dev/docs)
 - [Axum Documentation](https://docs.rs/axum/latest/axum/)
+- [eyre Documentation](https://docs.rs/eyre/latest/eyre/)
+- [color-eyre Documentation](https://docs.rs/color-eyre/latest/color_eyre/)
 - [multilingual-e5-base](https://huggingface.co/intfloat/multilingual-e5-base)
 - [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/)
 
