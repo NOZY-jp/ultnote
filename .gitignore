@@ -1,6 +1,7 @@
 .env
-core-api/target
-pg_data/
+api/target
 qdrant_data/
-ai-engine/__pycache__/
-
+embedder/__pycache__/
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/

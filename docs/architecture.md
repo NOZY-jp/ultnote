@@ -897,3 +897,87 @@ ultnote/
 - [ ] 監視・ログ収集
 - [ ] CI/CDパイプライン
 - [ ] Obsidian連携MCP（別プロジェクト）
+
+---
+
+## 13. 実装状況 (2026-01-09 更新)
+
+### 13.1 完了した機能
+
+| 機能 | 状態 | 備考 |
+|------|------|------|
+| メモCRUD | ✅ 完了 | POST/GET/PUT/DELETE /memo |
+| ベクトル検索 | ✅ 完了 | multilingual-e5-base、精度良好 |
+| 日付フィルタ | ✅ 完了 | from_gte, until_lte |
+| タグフィルタ | ✅ 完了 | 階層タグ対応 |
+| タグ一覧 | ✅ 完了 | ツリー形式 |
+| Cloudflare Access認証 | ✅ 完了 | JWT検証ミドルウェア |
+| デモモード | ✅ 完了 | 認証なしで memos_demo を使用 |
+| SvelteKit Frontend | ✅ 完了 | SSR、レスポンシブ対応 |
+| Docker Compose | ✅ 完了 | 開発・本番両対応 |
+| Cloudflare Tunnel | ✅ 完了 | docker-compose.prod.yml |
+
+### 13.2 未実装 (P1/P2)
+
+| 機能 | 優先度 | 備考 |
+|------|--------|------|
+| アーカイブ自動移動 | P1 | 日付経過後の自動移動 |
+| アクセス頻度ランキング | P1 | スコアリングに反映 |
+| タグ予測変換 | P1 | UI側のサジェスト |
+| カスタムメタデータ | P2 | key-value形式 |
+| アーカイブ検索 | P2 | 別画面から検索 |
+
+### 13.3 技術的な注意点
+
+| 項目 | 詳細 |
+|------|------|
+| Rust バージョン | 1.92+ 必須 (qdrant-client 1.16 の要件) |
+| Qdrant ポート | gRPC は 6334 (REST は 6333) |
+| Embedder | sentence-transformers 3.3.1 推奨 |
+| SvelteKit | Svelte 5 runes 構文 ($state, $props, $derived) |
+
+### 13.4 ディレクトリ構成
+
+```
+ultnote/
+├── docker-compose.yml          # 開発用
+├── docker-compose.prod.yml     # 本番用 (cloudflared 含む)
+├── .env.example                # 環境変数テンプレート
+├── nginx/
+│   └── nginx.conf
+├── frontend/                   # SvelteKit
+│   ├── src/
+│   │   ├── lib/
+│   │   │   ├── api.ts
+│   │   │   ├── types.ts
+│   │   │   └── components/
+│   │   │       ├── TagInput.svelte
+│   │   │       ├── DateFilters.svelte
+│   │   │       ├── MemoCard.svelte
+│   │   │       ├── SearchResults.svelte
+│   │   │       └── MemoModal.svelte
+│   │   └── routes/
+│   │       ├── +layout.svelte
+│   │       └── +page.svelte
+│   └── Dockerfile
+├── api/                        # Rust (Axum)
+│   ├── src/
+│   │   ├── main.rs
+│   │   ├── config.rs
+│   │   ├── auth.rs
+│   │   ├── error.rs
+│   │   ├── models/
+│   │   ├── routes/
+│   │   └── services/
+│   ├── Cargo.toml
+│   └── Dockerfile
+├── embedder/                   # Python (FastAPI)
+│   ├── main.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── scripts/
+│   ├── deploy.sh
+│   └── seed-demo.sh
+└── docs/
+    └── architecture.md
+```

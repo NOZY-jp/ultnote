@@ -1,17 +1,15 @@
 services:
-  # 1. Nginx (リバースプロキシ)
   nginx:
     image: nginx:alpine
     container_name: ultnote-nginx
-    ports:
-      - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
     restart: always
+    networks:
+      - ultnote
 
-  # 2. Frontend (SvelteKit SSR)
   frontend:
     build:
       context: ./frontend
@@ -22,8 +20,9 @@ services:
     depends_on:
       - api
     restart: always
+    networks:
+      - ultnote
 
-  # 3. API (Rust/Axum)
   api:
     build:
       context: ./api
@@ -33,25 +32,51 @@ services:
       - QDRANT_URL=http://qdrant:6334
       - EMBEDDER_URL=http://embedder:8000
       - RUST_LOG=info
+      - CF_TEAM_DOMAIN=${CF_TEAM_DOMAIN}
+      - CF_POLICY_AUD=${CF_POLICY_AUD}
     depends_on:
       - qdrant
       - embedder
     restart: always
+    networks:
+      - ultnote
 
-  # 4. Embedder (Python/FastAPI)
   embedder:
     build:
       context: ./embedder
       dockerfile: Dockerfile
     container_name: ultnote-embedder
     volumes:
-      - ~/.cache/huggingface:/root/.cache/huggingface
+      - huggingface_cache:/root/.cache/huggingface
     restart: always
+    networks:
+      - ultnote
 
-  # 5. Vector Database (Qdrant)
   qdrant:
     image: qdrant/qdrant:latest
     container_name: ultnote-qdrant
     volumes:
-      - ./qdrant_data:/qdrant/storage
+      - qdrant_data:/qdrant/storage
     restart: always
+    networks:
+      - ultnote
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: ultnote-cloudflared
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - nginx
+    restart: always
+    networks:
+      - ultnote
+
+networks:
+  ultnote:
+    driver: bridge
+
+volumes:
+  qdrant_data:
+  huggingface_cache:
