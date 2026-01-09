@@ -216,10 +216,15 @@ impl QdrantService {
                 let from = self.get_optional_date_field(&point.payload, "from")?;
                 let date_added = self.get_datetime_field(&point.payload, "date_added")?;
 
+                // スコア変換: ベースライン0.77を基準に0-1にスケール、指数変換で高スコアを強調
+                let baseline = 0.77_f32;
+                let linear = ((point.score - baseline) / (1.0 - baseline)).clamp(0.0, 1.0);
+                let normalized_score = linear.powf(0.5);
+
                 Ok(SearchResult {
                     id,
                     content,
-                    score: point.score,
+                    score: normalized_score,
                     tags,
                     from,
                     date_added,
